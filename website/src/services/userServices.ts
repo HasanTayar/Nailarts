@@ -10,7 +10,7 @@ interface User {
 }
 
 const api: AxiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL}/users`,
+  baseURL: `${import.meta.env.VITE_API_BASE_URL}users`,
 });
 
 export async function getUsers(): Promise<User[]> {
