@@ -5,7 +5,7 @@ const userRoutes = require('./routes/userRoutes');
 // Other app configurations
 
 // Use the userRoutes router
-app.use(userRoutes);
+app.use('/user',userRoutes);
 
 // Start the server
 app.listen(3000, () => {
