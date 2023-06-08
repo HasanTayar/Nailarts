@@ -10,8 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
+    "@types/react-redux": "^7.1.25",
+    "axios": "^1.4.0",
+    "dotenv": "^16.1.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.7",
+    "redux": "^4.2.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.37",
