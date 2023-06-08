@@ -1,15 +1,14 @@
-import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 function Navbar() {
   return (
-    <AppBar position="static" className="bg-blue-500">
+    <AppBar position="fixed" className="bg-pink-500">
       <Toolbar className="flex justify-between">
-        <Typography variant="h6" component="div" className="text-white">
+        <Typography variant="h6" component="div" className="text-white flex-grow-0">
           NailArts
         </Typography>
-        <div>
+        <div className="flex-grow flex justify-end">
           <Button
             component={RouterLink}
             to="/"
