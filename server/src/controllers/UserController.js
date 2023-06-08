@@ -101,5 +101,31 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete user' });
   }
 };
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await UserModel.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: 'Invalid login credentials' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to login user' });
+  }
+};
 
-module.exports = { getUsers, getUserById, createUser, updateUser, deleteUser };
+const registerUser = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const userExists = await UserModel.findOne({ email });
+    if (userExists) {
+      return res.status(409).json({ error: 'User with this email already exists' });
+    }
+    const user = await UserModel.create({ email, password });
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to register user' });
+  }
+};
+
+module.exports = { getUsers, getUserById, createUser, updateUser, deleteUser, loginUser, registerUser };
