@@ -12,9 +12,11 @@ interface User {
 }
 
 interface AuthResponse {
-  token: unknown;
+  token: string | undefined;
   user: User;
 }
+
+
 
 interface AuthState {
   token: string | null;
@@ -88,28 +90,39 @@ export default authSlice.reducer;
 // Async Thunks
 
 export const login = (email: string, password: string): ThunkAction<void, RootState, unknown, Action<string>> => async (dispatch) => {
-    try {
-      dispatch(loginStart());
-      const user: User = await loginUser(email, password);
-      const token: unknown  = process.env.REACT_APP_TOKEN;
-      const authResponse: AuthResponse = { token, user };
-      dispatch(loginSuccess(authResponse));
-    } catch (error) {
-      dispatch(loginFailure(error.message));
+  try {
+    dispatch(loginStart());
+    const user: User = await loginUser(email, password);
+    const token: string | undefined = process.env.REACT_APP_TOKEN;
+
+    if (!token) {
+      throw new Error('Token not found');
     }
-  };
-  
-  export const register = (email: string, password: string): ThunkAction<void, RootState, unknown, Action<string>> => async (dispatch) => {
-    try {
-      dispatch(registerStart());
-      const user: User = await registerUser(email, password);
-      const token: unknown  = process.env.VITE_TOKEN;
-      const authResponse: AuthResponse = { token, user };
-      dispatch(registerSuccess(authResponse));
-    } catch (error) {
-      dispatch(registerFailure(error.message));
+
+    const authResponse: AuthResponse = { token, user };
+    dispatch(loginSuccess(authResponse));
+  } catch (error:any) {
+    dispatch(loginFailure(error.message));
+  }
+};
+
+export const register = (email: string, password: string): ThunkAction<void, RootState, unknown, Action<string>> => async (dispatch) => {
+  try {
+    dispatch(registerStart());
+    const user: User = await registerUser(email, password);
+    const token: string | undefined = process.env.VITE_TOKEN;
+
+    if (!token) {
+      throw new Error('Token not found');
     }
-  };
+
+    const authResponse: AuthResponse = { token, user };
+    dispatch(registerSuccess(authResponse));
+  } catch (error:any) {
+    dispatch(registerFailure(error.message));
+  }
+};
+
   
   
   
