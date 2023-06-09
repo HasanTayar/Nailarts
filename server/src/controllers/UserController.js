@@ -1,7 +1,7 @@
 const { Request, Response } = require('express');
 const path = require('path');
 const multer = require('multer');
-const UserModel = require('../models/User');
+const UserModel = require('../models/user');
 
 
 // Set up the storage configuration for multer
