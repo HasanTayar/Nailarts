@@ -4,12 +4,15 @@ import { RootState } from './index';
 import { loginUser, registerUser } from '../services/userServices';
 
 interface User {
-  id: string;
+  
   firstName: string;
   lastName: string;
   phone: string;
   password: string;
+  confirmPassword?: string;
+  photo : File | null;
 }
+
 
 interface AuthResponse {
   token: string | undefined;
@@ -106,22 +109,24 @@ export const login = (email: string, password: string): ThunkAction<void, RootSt
   }
 };
 
-export const register = (email: string, password: string): ThunkAction<void, RootState, unknown, Action<string>> => async (dispatch) => {
+export const register = (user: User): ThunkAction<void, RootState, unknown, Action<string>> => async (dispatch) => {
   try {
     dispatch(registerStart());
-    const user: User = await registerUser(email, password);
+    const newUser: User = await registerUser(user);
     const token: string | undefined = process.env.VITE_TOKEN;
 
     if (!token) {
       throw new Error('Token not found');
     }
 
-    const authResponse: AuthResponse = { token, user };
+    const authResponse: AuthResponse = { token, user: newUser };
     dispatch(registerSuccess(authResponse));
   } catch (error:any) {
     dispatch(registerFailure(error.message));
   }
 };
+
+
 
   
   

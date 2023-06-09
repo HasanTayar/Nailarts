@@ -3,6 +3,8 @@ import authSlice from './authSlice';
 
 const store = configureStore({
   reducer: { auth: authSlice },
+  middleware: getDefaultMiddleware => getDefaultMiddleware({ thunk: true }),
+
 });
 
 export type RootState = ReturnType<typeof store.getState>;

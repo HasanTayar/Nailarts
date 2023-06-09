@@ -1,13 +1,15 @@
 
 import axios, { AxiosInstance } from 'axios';
-
 interface User {
-  id: string;
+  
   firstName: string;
   lastName: string;
   phone: string;
   password: string;
+  confirmPassword?: string;
+  photo: File | null;
 }
+
 
 const api: AxiosInstance = axios.create({
   baseURL: `${import.meta.env.VITE_API_BASE_URL}users`,
@@ -66,9 +68,9 @@ export async function loginUser(email: string, password: string): Promise<User> 
   }
 }
 
-export async function registerUser(email: string, password: string): Promise<User> {
+export async function registerUser(user: User): Promise<User> {
   try {
-    const response = await api.post<User>('/register', { email, password });
+    const response = await api.post<User>('/register', { user });
     return response.data;
   } catch (error) {
     throw new Error('Failed to register user');

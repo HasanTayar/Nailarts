@@ -69,7 +69,7 @@ const LoginForm = () => {
         התחברות
       </Button>
       <GoogleLogin
-        client_id="YOUR_CLIENT_ID" // replace with your client id from Google Cloud Console
+        client_id={`${import.meta.env.VITE_CLIENT_ID}`}
         onSuccess={responseGoogle}
         onFailure={responseGoogle}
         cookiepolicy={'single_host_origin'}
