@@ -1,18 +1,10 @@
-
 import axios, { AxiosInstance } from 'axios';
-interface User {
-  
-  firstName: string;
-  lastName: string;
-  phone: string;
-  password: string;
-  confirmPassword?: string;
-  photo: File | null;
-}
+import { User, UserAuthResponse } from '../types/User'; // update this import according to your project structure
+
 
 
 const api: AxiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL}users`,
+  baseURL:`${import.meta.env.VITE_API_BASE_URL}`,
 });
 
 export async function getUsers(): Promise<User[]> {
@@ -59,18 +51,29 @@ export async function deleteUser(id: string): Promise<void> {
   }
 }
 
-export async function loginUser(email: string, password: string): Promise<User> {
+export async function loginUser(email: string, password: string): Promise<UserAuthResponse> {
   try {
-    const response = await api.post<User>('/login', { email, password });
+    const response = await api.post<UserAuthResponse>('/login', { email, password });
     return response.data;
   } catch (error) {
     throw new Error('Failed to login user');
   }
 }
 
-export async function registerUser(user: User): Promise<User> {
+export async function registerUser(user: User): Promise<UserAuthResponse> {
   try {
-    const response = await api.post<User>('/register', { user });
+    const formData = new FormData();
+
+    Object.entries(user).forEach(([key, value]) => {
+      formData.append(key, value as string | Blob);
+    });
+
+    const response = await api.post<UserAuthResponse>('/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     return response.data;
   } catch (error) {
     throw new Error('Failed to register user');

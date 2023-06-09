@@ -1,131 +1,119 @@
-const { Request, Response } = require('express');
+const User = require('../models/user');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const path = require('path');
-const multer = require('multer');
-const UserModel = require('../models/user');
+const fs = require('fs');
 
+// Create and Save a new User
+exports.registerUser = async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const user = new User({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      phone: req.body.phone,
+      photo: req.file ? path.join('asset', 'userImages', req.file.filename) : User.image,
+      password: hashedPassword
+    });
 
-// Set up the storage configuration for multer
-const storage = multer.diskStorage({
-  destination: 'public/asset/userImages',
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  },
-});
+    const newUser = await user.save();
+    res.status(201).json(newUser);
+  } catch (error){
+    console.log(error);
+    res.status(400).send('error while creating user');
+  }
+};
 
-// Create the multer instance with the storage configuration
-const upload = multer({ storage });
+// Login a user
+exports.loginUser = async (req, res) => {
+  const user = await User.findOne({email: req.body.email});
+
+  if(user == null) {
+    return res.status(400).send('User not found');
+  }
+
+  try {
+    if(await bcrypt.compare(req.body.password, user.password)) {
+      const accessToken = jwt.sign(user.toJSON(), process.env.ACCESS_TOKEN_SECRET);
+      res.json({ accessToken: accessToken });
+    } else {
+      res.send('Not Allowed');
+    }
+  } catch(error) {
+    console.log(error);
+    res.status(500).send();
+  }
+};
 
 // Get all users
-const getUsers = async (req, res) => {
-  try {
-    const users = await UserModel.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch users' });
-  }
+exports.getUsers = async (req, res) => {
+  const users = await User.find({});
+  res.send(users);
 };
 
 // Get a single user by ID
-const getUserById = async (req, res) => {
-  const userId = req.params.id;
-
-  try {
-    const user = await UserModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user' });
+exports.getUserById = async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if(user == null) {
+    return res.status(404).send('Cannot find user');
   }
+  res.send(user);
 };
-
-// Create a new user with image upload
-const createUser = async (req, res) => {
-  upload.single('photo')(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ error: 'Image upload failed' });
-    }
-    const { firstName, lastName, phone, password } = req.body;
-
-    try {
-      const newUser = await UserModel.create({
-        firstName,
-        lastName,
-        phone,
-        password,
-        photo: req.file ? req.file.path : 'default-image-path.jpg',
-      });
-      res.status(201).json(newUser);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to create user' });
-    }
-  });
-};
-
 
 // Update a user
-const updateUser = async (req, res) => {
-  const userId = req.params.id;
-  const { firstName, lastName, phone, password } = req.body;
-
+exports.updateUser = async (req, res) => {
   try {
-    const user = await UserModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    const user = await User.findById(req.params.id);
+    if(user == null) {
+      return res.status(404).send('Cannot find user');
     }
-    user.firstName = firstName;
-    user.lastName = lastName;
-    user.phone = phone;
-    user.password = password;
-    await user.save();
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to update user' });
+
+    if(req.body.password != null) {
+      user.password = await bcrypt.hash(req.body.password, 10);
+    }
+    
+    if(req.file) {
+      // remove old image if it exists
+      if (user.photo) {
+        const oldImagePath = path.join(__dirname, '..', 'public', user.photo);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      // update with new image
+      user.photo = path.join('asset', 'userImages', req.file.filename);
+    }
+
+    const updatedUser = await user.save();
+    res.send(updatedUser);
+
+  } catch(error) {
+    console.log(error);
+    res.status(400).send('Error updating user');
   }
 };
 
 // Delete a user
-const deleteUser = async (req, res) => {
-  const userId = req.params.id;
-
+exports.deleteUser = async (req, res) => {
   try {
-    const user = await UserModel.findByIdAndDelete(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    const user = await User.findById(req.params.id);
+    if(user == null) {
+      return res.status(404).send('Cannot find user');
     }
-    res.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to delete user' });
+
+    // remove image if it exists
+    if (user.photo) {
+      const imagePath = path.join(__dirname, '..', 'public', user.photo);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    await User.remove(user);
+    res.send('User deleted');
+
+  } catch (e){
+    console.log(e);
+    res.status(500).send();
   }
 };
-const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await UserModel.findOne({ email });
-    if (!user || user.password !== password) {
-      return res.status(401).json({ error: 'Invalid login credentials' });
-    }
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to login user' });
-  }
-};
-
-const registerUser = async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const userExists = await UserModel.findOne({ email });
-    if (userExists) {
-      return res.status(409).json({ error: 'User with this email already exists' });
-    }
-    const user = await UserModel.create({ email, password });
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to register user' });
-  }
-};
-
-module.exports = { getUsers, getUserById, createUser, updateUser, deleteUser, loginUser, registerUser };

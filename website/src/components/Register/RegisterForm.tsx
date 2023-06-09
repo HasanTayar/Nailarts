@@ -1,23 +1,24 @@
-import { useState } from 'react';
-import { useDispatch } from '../../store/useDispatch';
-import { register } from '../../store/authSlice';
-import { useNavigate } from 'react-router-dom';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Alert from '@mui/material/Alert';
-import { styled } from '@mui/system';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import { useState } from "react";
+import { useDispatch } from "../../store/useDispatch";
+import { register } from "../../store/authSlice";
+import { useNavigate } from "react-router-dom";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import { styled } from "@mui/system";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
 const MyTextField = styled(TextField)`
   width: 100%;
   margin-bottom: 15px;
+  text-algin: left;
 `;
 
-const Input = styled('input')({
-  display: 'none',
+const Input = styled("input")({
+  display: "none",
 });
 
 const RegisterForm = () => {
@@ -25,14 +26,16 @@ const RegisterForm = () => {
   const navigate = useNavigate();
 
   const [user, setUser] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    photo: null,
   });
 
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | undefined>();
 
@@ -43,15 +46,13 @@ const RegisterForm = () => {
     });
   };
 
-
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     setFile(file);
     setPreview(file ? URL.createObjectURL(file) : undefined);
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     if (user.password !== user.confirmPassword) {
@@ -65,37 +66,63 @@ const RegisterForm = () => {
     };
 
     try {
-      await dispatch(register(userWithPhoto));
-      navigate('/');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch(err : any) {
+      dispatch(register(userWithPhoto));
+      navigate("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       setError(err.message);
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '15px'}}>
-        <Avatar alt="User Image" src={preview} sx={{width: 56, height: 56}}/>
-        <Input accept="image/*" id="icon-button-file" type="file" onChange={handleFileChange} />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "15px",
+        }}
+      >
+        <Avatar alt="User Image" src={preview} sx={{ width: 56, height: 56 }} />
+        <Input
+          accept="image/*"
+          id="icon-button-file"
+          type="file"
+          onChange={handleFileChange}
+        />
         <label htmlFor="icon-button-file">
-          <IconButton color="primary" aria-label="upload picture" component="span">
+          <IconButton
+            color="primary"
+            aria-label="upload picture"
+            component="span"
+          >
             <PhotoCamera />
           </IconButton>
         </label>
       </Box>
-           <MyTextField
+      <MyTextField
         name="firstName"
         label="שם פרטי"
         value={user.firstName}
         onChange={handleInputChange}
       />
+
       <MyTextField
         name="lastName"
         label="שם משפחה"
         value={user.lastName}
         onChange={handleInputChange}
       />
+      <MyTextField
+        label="דוא״ל"
+        value={user.email}
+        name="email" // Make sure the name attribute is set to "email"
+        autoComplete="email"
+        onChange={handleInputChange}
+        autoFocus
+      />
+
       <MyTextField
         name="phone"
         label="טלפון"
