@@ -3,7 +3,7 @@ import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 
 
-const Login = () => {
+const Register = () => {
   return (
     <Container 
       component="main" 
@@ -21,4 +21,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
