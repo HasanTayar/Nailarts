@@ -15,9 +15,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
-app.use(cors(corsOptions));
-
 app.use('/user', userRoutes);
 
 app.listen(3000, () => {
