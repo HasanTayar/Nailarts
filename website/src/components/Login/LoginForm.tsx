@@ -19,6 +19,7 @@ const LoginForm = () => {
     dispatch(login(email, password));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const responseGoogle = (response: any) => {
     const tokenId = response?.tokenId;
     if (tokenId) {

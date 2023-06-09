@@ -67,6 +67,7 @@ const RegisterForm = () => {
     try {
       await dispatch(register(userWithPhoto));
       navigate('/');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch(err : any) {
       setError(err.message);
     }

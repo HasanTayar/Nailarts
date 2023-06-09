@@ -104,6 +104,7 @@ export const login = (email: string, password: string): ThunkAction<void, RootSt
 
     const authResponse: AuthResponse = { token, user };
     dispatch(loginSuccess(authResponse));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error:any) {
     dispatch(loginFailure(error.message));
   }
@@ -121,6 +122,7 @@ export const register = (user: User): ThunkAction<void, RootState, unknown, Acti
 
     const authResponse: AuthResponse = { token, user: newUser };
     dispatch(registerSuccess(authResponse));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error:any) {
     dispatch(registerFailure(error.message));
   }
