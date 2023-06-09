@@ -5,7 +5,7 @@ const userRoutes = require('./routes/userRoutes');
 const cors = require('cors');
 
 const corsOptions = {
-  origin: process.env.REACT_APP_URL,
+  origin: "*",
   optionsSuccessStatus: 200
 };
 
